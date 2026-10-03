@@ -1,12 +1,12 @@
-package candidate.judge;
-
+import candidate.judge.*;
 import java.util.*;
 
 /**
  * Minimal runnable example. Mock LlmCaller, no API key needed.
+ * Compile: javac -cp src/main/java examples/Example.java
+ * Run:     java -cp src/main/java;examples Example
  */
 public class Example {
-
     public static void main(String[] args) {
         LlmCaller gen = (sys, user) ->
             new LlmCaller.Result("rewritten: " + user.hashCode(), 120 + new Random().nextInt(80), 50);
@@ -25,7 +25,7 @@ public class Example {
 
         CandidateJudge.Report rep = CandidateJudge.vote(judge, cands, 3);
         System.out.println();
-        System.out.println(rep.toString());
+        System.out.println(rep);
         System.out.println("Winner: " + rep.winner.text);
     }
 }
