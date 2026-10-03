@@ -1,13 +1,21 @@
 # miao-ai
 
-Multi-candidate generation + AI judge voting for LLM text tasks.
+Multi-candidate generation + AI judge voting for any LLM task.
 
-**The problem**: existing LLM libraries (LiteLLM, OpenRouter, LangChain) only solve "call one model, get one result". Nobody solves "call multiple models, get multiple candidates, then have AI judges vote on the best one" — but this is the single most effective way to improve translation/rewrite quality.
+**The problem**: existing LLM libraries (LiteLLM, OpenRouter, LangChain) only solve "call one model, get one result". Nobody solves "call multiple times, get multiple candidates, then have AI judges vote on the best one" — but this is the single most effective way to improve output quality for any task.
+
+## What it works for
+
+- **Translation** — pick the most accurate rendering
+- **Writing / rewriting** — pick the most natural phrasing
+- **Code generation** — pick the most correct implementation
+- **Prompt engineering** — generate multiple prompts, pick the best
+- **Anything where "one answer isn't good enough"**
 
 ## Algorithm
 
 ```
-Input: prompt + original text
+Input: task + prompt
   │
   ├─→ Generator[0] → candidate A
   ├─→ Generator[1] → candidate B     (parallel, position-shifted)
@@ -18,7 +26,7 @@ Input: prompt + original text
   ├─→ Judge[1]: A vs B vs C vs D → votes 0
   └─→ Judge[K-1]: A vs B vs C vs D → votes 2
   │
-  └─→ Tally: candidate 2 gets 2 votes, candidate 0 gets 1 → pick candidate 2
+  └─→ Tally: candidate 2 gets 2 votes → pick candidate 2
 ```
 
 ### Three key design choices
@@ -30,14 +38,22 @@ Input: prompt + original text
 ## Usage
 
 ```java
-LlmCaller generator = (sys, user) -> httpCall("openai-compatible-endpoint", "gpt-4o", sys, user);
-LlmCaller judge     = (sys, user) -> httpCall("openai-compatible-endpoint", "gpt-4o", sys, user);
+LlmCaller generator = (sys, user) -> httpCall("your-openai-compatible-endpoint", "model-name", sys, user);
+LlmCaller judge     = (sys, user) -> httpCall("your-openai-compatible-endpoint", "model-name", sys, user);
 
+// 4 candidates, 3 judges
 List<String> candidates = MultiCandidateJudge.generateCandidates(
-    generator, "Rewrite the sentence naturally", "Hello world", 4);
+    generator, "Rewrite this sentence naturally", "Hello world", 4);
 String best = MultiCandidateJudge.judgeVote(judge, candidates, 3);
 System.out.println("Best: " + best);
 ```
+
+## Platform
+
+- **Pure Java 8+** — zero dependencies
+- Runs on **Android, server JVM, desktop, anywhere JVM runs**
+- Kotlin can use it directly
+- Bring your own LLM endpoint (any OpenAI-compatible API works)
 
 ## Cost
 
@@ -48,12 +64,6 @@ System.out.println("Best: " + best);
 | 5 candidates, 5 judges | 10 | diminishing returns |
 
 **Default: 3+3**. Good cost/quality tradeoff. Go 5+5 only for high-stakes output.
-
-## Requirements
-
-- Java 8+
-- No dependencies
-- Bring your own LLM endpoint (any OpenAI-compatible API works)
 
 ## License
 
