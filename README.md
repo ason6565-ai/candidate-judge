@@ -1,7 +1,5 @@
 # candidate-judge
 
-> Extracted from [MiaoHelper](https://github.com/ason6565-ai/MiaoHelper) (拟言助手).
-
 Multi-candidate generation + AI judge voting for any LLM task.
 多候选生成 + AI裁判投票，适用于任何大模型任务。
 
